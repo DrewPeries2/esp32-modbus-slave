@@ -306,6 +306,16 @@ void app_main(void) {
     //new setup:
         //register all commands in here, and initialize slave i guess? dunno how import settings will work
 
+        esp_console_repl_t *repl = NULL;
+        esp_console_repl_config_t repl_config = ESP_CONSOLE_REPL_CONFIG_DEFAULT();
+    /* Prompt to be printed before each line.
+     * This can be customized, made dynamic, etc.
+     */
+        repl_config.prompt = PROMPT_STR ">";
+        repl_config.max_cmdline_length = CONFIG_CONSOLE_MAX_COMMAND_LINE_LENGTH;
+
+    initialize_nvs();
+
         ESP_ERROR_CHECK(nvs_flash_init());
 
         ESP_ERROR_CHECK(init_wifi());
