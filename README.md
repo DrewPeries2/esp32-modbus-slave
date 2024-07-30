@@ -1,33 +1,29 @@
-# _Sample project_
+# _MB-Slave Demo_
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+## info
+This was developed using the ESP-IDF extension on vs-code, other IDEs have not been tested.
+Original documentation of the APK/APIs is here:
+https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/console.html - CLI
+https://docs.espressif.com/projects/esp-modbus/en/latest/esp32/slave_api_overview.html - MB
+https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/wifi-security.html - WPA2 enterprise
 
-This is the simplest buildable example. The example is used by command `idf.py create-project`
-that copies the project to user specified path and set it's name. For more information follow the [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project)
+## how to edit modbus
+Overview - 
+  The function "slave_init()" holds the processes to initialize the modbus controller, communication parameters, and the registers.
+  The function "slave_operation_func()" is a while loop that continuously checks for reads/writes and handles/logs them.
+
+How to initialize registers - 
+  Register areas are initialized by populating a mb_register_area_descriptor_t type struct then inputting that into the0 "mbc_slave_set_descriptor()" function.
+  In the slave_demo, this is found in the "slave_init()" function, where you specify the type, starting index, memory address, and size.
+  Note: you can initialize multiple areas of the same type with different starting indexes.
+  
+Misc. Notes:
+  If you'd like the modbus slave to only handle requests to its specific Slave ID, then remove the parenthesis around "1" in the "MB_Slave_ID" Define. I don't know why this happens.
+
+## Version 1.0.0
+ - Support for WPA2 enterprise wifi
+ - Hosts a MB slave server and is able to be read+changed from any master
+ - Modbus register storage is initialized through predefined arrays
 
 
-
-## How to use example
-We encourage the users to use the example as a template for the new projects.
-A recommended way is to follow the instructions on a [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project).
-
-## Example folder contents
-
-The project **sample_project** contains one source file in C language [main.c](main/main.c). The file is located in folder [main](main).
-
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt`
-files that provide set of directives and instructions describing the project's source files and targets
-(executable, library, or both). 
-
-Below is short explanation of remaining files in the project folder.
-
-```
-├── CMakeLists.txt
-├── main
-│   ├── CMakeLists.txt
-│   └── main.c
-└── README.md                  This is the file you are currently reading
-```
-Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
-They are not used or needed when building with CMake and idf.py.
 # esp32-modbus-slave
