@@ -89,17 +89,4 @@ void app_main(void) {
         ESP_ERROR_CHECK(esp_console_new_repl_uart(&hw_config, &repl_config, &repl));
         ESP_ERROR_CHECK(esp_console_start_repl(repl));
 
-
-
-        // comm_info.ip_addr_type = MB_IPV4;
-        // comm_info.ip_mode = MB_MODE_TCP;
-        // comm_info.ip_port = MB_TCP_PORT_NUMBER;
-        // ESP_ERROR_CHECK(slave_init(&comm_info));
-
-        // make a command i guess create_test_data();
-        // also make a command slave_operation_func(NULL);
-
-        // idk how to exit but this will happen when exit ESP_ERROR_CHECK(slave_destroy());
-        // make a command ESP_ERROR_CHECK(destroy_services());
-
 }

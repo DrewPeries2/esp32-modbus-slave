@@ -16,7 +16,7 @@
 #include "esp_netif.h"
 #include "esp_mac.h"
 #include "mbcontroller.h" 
-#include "wifi.c"
+#include "wifi/wifi.c"
 
 
 // MB DEFINES
