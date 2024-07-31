@@ -1,7 +1,7 @@
 # _MB-Slave Demo_
 
 ## info
-This was developed using the ESP-IDF extension on vs-code, other IDEs have not been tested.
+This was developed using the ESP-IDF v5.3 (required) extension on vs-code, other IDEs have not been tested.
 Original documentation of the APK/APIs is here:
 https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/console.html - CLI
 https://docs.espressif.com/projects/esp-modbus/en/latest/esp32/slave_api_overview.html - MB

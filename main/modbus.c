@@ -122,6 +122,7 @@ static esp_err_t slave_init(mb_communication_info_t* comm_info) {
     comm_info->ip_netif_ptr = sta_netif;
     comm_info->slave_uid = MB_SLAVE_ID;
     err = mbc_slave_setup((void*)comm_info);
+    ESP_LOGI(TAG,"we got past setup.");
 
     MB_RETURN_ON_FALSE((err == ESP_OK), ESP_ERR_INVALID_STATE,
                                         TAG,
@@ -139,6 +140,7 @@ static esp_err_t slave_init(mb_communication_info_t* comm_info) {
                                     TAG,
                                     "mbc_slave_set_descriptor fail, returns(0x%x).",
                                     (int)err);
+    ESP_LOGI(TAG,"we got past first area");
     // Initialization of Input Registers area
     reg_area.type = MB_PARAM_INPUT;
     reg_area.start_offset = MB_REG_INPUT_START_AREA0;
@@ -149,12 +151,14 @@ static esp_err_t slave_init(mb_communication_info_t* comm_info) {
                                         TAG,
                                         "mbc_slave_set_descriptor fail, returns(0x%x).",
                                         (int)err);
+    ESP_LOGI(TAG,"we got past second area");
     // Starts of modbus controller and stack
     err = mbc_slave_start();
     MB_RETURN_ON_FALSE((err == ESP_OK), ESP_ERR_INVALID_STATE,
                                         TAG,
                                         "mbc_slave_start fail, returns(0x%x).",
                                         (int)err);
+     ESP_LOGI(TAG,"we got to the end.");
     vTaskDelay(5);
     return err;
 }

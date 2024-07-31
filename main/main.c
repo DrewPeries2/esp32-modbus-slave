@@ -22,7 +22,7 @@
 #include "commands.c"
 //Defines
 
-#define PROMPT_STR "slave"
+#define PROMPT_STR ""
 #define CONFIG_CONSOLE_MAX_COMMAND_LINE_LENGTH 1024
 
 #define TAG "slave"
@@ -81,6 +81,8 @@ void app_main(void) {
 
         //registering command families
         register_wifi();
+        register_modbus_init();
+        register_start_modbus();
         // register_modbus_commands();
 
         esp_console_dev_uart_config_t hw_config = ESP_CONSOLE_DEV_UART_CONFIG_DEFAULT();

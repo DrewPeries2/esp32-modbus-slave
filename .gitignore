@@ -5,3 +5,5 @@ build/
 .cproject
 .project
 sdkconfig
+secrets.h
+dependencies.lock
