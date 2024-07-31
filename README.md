@@ -20,10 +20,14 @@ How to initialize registers -
 Misc. Notes:
   If you'd like the modbus slave to only handle requests to its specific Slave ID, then remove the parenthesis around "1" in the "MB_Slave_ID" Define. I don't know why this happens.
 
-## Version 1.0.0
+## Versions
+ 1.0.0
  - Support for WPA2 enterprise wifi
  - Hosts a MB slave server and is able to be read+changed from any master
  - Modbus register storage is initialized through predefined arrays
+ 1.1.0
+ - Added CLI, Reorganized files - more reorganization soon.
+
 
 
 # esp32-modbus-slave
