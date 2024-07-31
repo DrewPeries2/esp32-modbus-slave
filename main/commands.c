@@ -20,7 +20,7 @@
 
 extern void register_wifi() {
     const esp_console_cmd_t cmd = {
-        .command = "wifi",
+        .command = "connect_wpa2",
         .help = "Get the current size of free heap memory",
         .hint = NULL,
         .func = &init_wifi,
@@ -28,4 +28,3 @@ extern void register_wifi() {
     ESP_ERROR_CHECK( esp_console_cmd_register(&cmd) );
     return;
 }
-
