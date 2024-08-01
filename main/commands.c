@@ -26,7 +26,7 @@ extern void register_wifi() {
         .command = "connect_wpa2",
         .help = "connect to wpa2 enterprise",
         .hint = NULL,
-        .func = &init_wifi,
+        .func = &init_wifi, 
     };
     ESP_ERROR_CHECK( esp_console_cmd_register(&cmd) );
     return;
@@ -47,12 +47,15 @@ extern void register_modbus_init() {
     return;
 }
 
+
+//USE MULTIPROCESSING
 extern void register_start_modbus() {
     const esp_console_cmd_t cmd = {
         .command = "start_modbus",
         .help = "start modbus",
         .hint = NULL,
         .func = &slave_operation_func,
+
     };
     ESP_ERROR_CHECK( esp_console_cmd_register(&cmd) );
     return;

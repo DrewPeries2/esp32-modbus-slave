@@ -22,7 +22,7 @@
 #include "commands.c"
 //Defines
 
-#define PROMPT_STR ""
+#define PROMPT_STR "slave"
 #define CONFIG_CONSOLE_MAX_COMMAND_LINE_LENGTH 1024
 
 #define TAG "slave"
