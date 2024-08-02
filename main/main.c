@@ -62,11 +62,8 @@ static void initialize_nvs(void)
     ESP_ERROR_CHECK(err);
 }
 
-void app_main(void) {
-
+void start_CLI() {
     //new setup:
-        //register all commands in here, and initialize slave i guess? dunno how import settings will work
-
         esp_console_repl_t *repl = NULL;
         esp_console_repl_config_t repl_config = ESP_CONSOLE_REPL_CONFIG_DEFAULT();
     /* Prompt to be printed before each line.
@@ -77,16 +74,34 @@ void app_main(void) {
 
         initialize_nvs();
         ESP_ERROR_CHECK(nvs_flash_init());
-        esp_log_level_set(TAG, ESP_LOG_INFO);
+        esp_log_level_set(TAG, ESP_LOG_VERBOSE);
 
         //registering command families
         register_wifi();
         register_modbus_init();
         register_start_modbus();
-        // register_modbus_commands();
+        register_ip();
+        register_wifi_enterprise();
+        //register_modbus_commands();
 
         esp_console_dev_uart_config_t hw_config = ESP_CONSOLE_DEV_UART_CONFIG_DEFAULT();
+        ESP_LOGI(TAG, "Starting REPL");
         ESP_ERROR_CHECK(esp_console_new_repl_uart(&hw_config, &repl_config, &repl));
-        ESP_ERROR_CHECK(esp_console_start_repl(repl));
+        esp_console_start_repl(repl);
+       //vTaskDelete(NULL);
+        while (true) {
+        vTaskDelay(pdMS_TO_TICKS(1000)); // 1 second delay loop
+    }
+}
 
+void app_main(void) {
+    xTaskCreatePinnedToCore(
+        start_CLI,       // Task function
+        "CLI",      // Task name
+        8192,          // Stack size in bytes
+        NULL,          // Parameter to pass
+        1,             // Task priority
+        NULL,          // Task handle
+        1              // Core ID (1)
+    );
 }

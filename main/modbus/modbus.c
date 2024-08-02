@@ -60,10 +60,51 @@ uint16_t holding_reg_area[5000];
 uint16_t input_reg_area[5000];
 
 
+//Slave Operation
+void slave_operation_func_logging()
+{
+    mb_param_info_t reg_info; // keeps the Modbus registers access information
+    uint8_t error_flag = 0;
 
+    ESP_LOGI(TAG, "Modbus slave stack initialized.");
+    ESP_LOGI(TAG, "Start modbus test...");
+    // The cycle below will be terminated when parameter holding_data0
+    // incremented each access cycle reaches the CHAN_DATA_MAX_VAL value.
+    while(error_flag == 0) {
+        // Check for read/write events of Modbus master for certain events
+        (void)mbc_slave_check_event(MB_READ_WRITE_MASK);
+        ESP_ERROR_CHECK_WITHOUT_ABORT(mbc_slave_get_param_info(&reg_info, MB_PAR_INFO_GET_TOUT));
+        const char* rw_str = (reg_info.type & MB_READ_MASK) ? "READ" : "WRITE";
+        // Filter events and process them accordingly
+        if(reg_info.type & (MB_EVENT_HOLDING_REG_WR | MB_EVENT_HOLDING_REG_RD)) {
+            // Get parameter information from parameter queue
+            ESP_LOGI(TAG, "HOLDING %s (%" PRIu32 " us), ADDR:%u, TYPE:%u, INST_ADDR:0x%" PRIx32 ", SIZE:%u",
+                            rw_str,
+                            reg_info.time_stamp,
+                            (unsigned)reg_info.mb_offset,
+                            (unsigned)reg_info.type,
+                            (uint32_t)reg_info.address,
+                            (unsigned)reg_info.size);
+            if (reg_info.address >= (uint8_t*)&holding_reg_area[5000])
+            {
+                error_flag = 1;
+            }
+        } else if (reg_info.type & MB_EVENT_INPUT_REG_RD) {
+            ESP_LOGI(TAG, "INPUT READ (%" PRIu32 " us), ADDR:%u, TYPE:%u, INST_ADDR:0x%" PRIx32 ", SIZE:%u",
+                            reg_info.time_stamp,
+                            (unsigned)reg_info.mb_offset,
+                            (unsigned)reg_info.type,
+                            (uint32_t)reg_info.address,
+                            (unsigned)reg_info.size);
+        }
+    }
+    // Destroy of Modbus controller on alarm
+    ESP_LOGI(TAG,"Modbus controller destroyed.");
+    vTaskDelay(100);
+}
 
 //Slave Operation
-static void slave_operation_func(void *arg)
+void slave_operation_func()
 {
     mb_param_info_t reg_info; // keeps the Modbus registers access information
     uint8_t error_flag = 0;
@@ -106,7 +147,10 @@ static void slave_operation_func(void *arg)
 }
 
 
-static esp_err_t slave_init(mb_communication_info_t* comm_info) {
+
+
+
+esp_err_t slave_init(mb_communication_info_t* comm_info) {
 
     mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
     void* slave_handler = NULL;
@@ -122,7 +166,6 @@ static esp_err_t slave_init(mb_communication_info_t* comm_info) {
     comm_info->ip_netif_ptr = sta_netif;
     comm_info->slave_uid = MB_SLAVE_ID;
     err = mbc_slave_setup((void*)comm_info);
-    ESP_LOGI(TAG,"we got past setup.");
 
     MB_RETURN_ON_FALSE((err == ESP_OK), ESP_ERR_INVALID_STATE,
                                         TAG,
@@ -140,7 +183,6 @@ static esp_err_t slave_init(mb_communication_info_t* comm_info) {
                                     TAG,
                                     "mbc_slave_set_descriptor fail, returns(0x%x).",
                                     (int)err);
-    ESP_LOGI(TAG,"we got past first area");
     // Initialization of Input Registers area
     reg_area.type = MB_PARAM_INPUT;
     reg_area.start_offset = MB_REG_INPUT_START_AREA0;
@@ -151,18 +193,15 @@ static esp_err_t slave_init(mb_communication_info_t* comm_info) {
                                         TAG,
                                         "mbc_slave_set_descriptor fail, returns(0x%x).",
                                         (int)err);
-    ESP_LOGI(TAG,"we got past second area");
     // Starts of modbus controller and stack
     err = mbc_slave_start();
     MB_RETURN_ON_FALSE((err == ESP_OK), ESP_ERR_INVALID_STATE,
                                         TAG,
                                         "mbc_slave_start fail, returns(0x%x).",
                                         (int)err);
-     ESP_LOGI(TAG,"we got to the end.");
     vTaskDelay(5);
     return err;
 }
-
 
 static esp_err_t slave_destroy(void)
 {
@@ -189,4 +228,19 @@ static void create_test_data() {
         input_reg_area[501] = 173;
         input_reg_area[506] = 543;
         portEXIT_CRITICAL(&param_lock);
+}
+
+
+void start_slave() {
+    
+        xTaskCreatePinnedToCore(
+        slave_operation_func,       // Task function
+        "modbus-slave",      // Task name
+        8192,          // Stack size in bytes
+        NULL,          // Parameter to pass
+        1,             // Task priority
+        NULL,          // Task handle
+        0              // Core ID (1)
+    );
+        vTaskDelay(2000);
 }

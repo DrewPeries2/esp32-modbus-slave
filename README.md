@@ -1,4 +1,4 @@
-# _MB-Slave Demo_
+# _Auredia MB-Slave_
 
 ## info
 This was developed using the ESP-IDF v5.3 (required) extension on vs-code, other IDEs have not been tested.
@@ -27,6 +27,11 @@ Misc. Notes:
  - Modbus register storage is initialized through predefined arrays
  1.1.0
  - Added CLI, Reorganized files - more reorganization soon.
+ 1.2.0
+ - Added WPA wifi support
+ - Concurrency support
+ - added arguments to wifi commands
+ - ***only works with ESP32 not ESP32S2 mini***
 
 
 
