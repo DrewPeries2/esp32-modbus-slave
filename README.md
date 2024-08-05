@@ -25,16 +25,16 @@ Misc. Notes:
  - Support for WPA2 enterprise wifi
  - Hosts a MB slave server and is able to be read+changed from any master
  - Modbus register storage is initialized through predefined arrays
- - 
+   
  - ***1.1.0***
  - Added CLI, Reorganized files - more reorganization soon.
- - 
+   
  - ***1.2.0***
  - Added WPA wifi support
  - Concurrency support
  - added arguments to wifi commands
  - ***only works with ESP32 not ESP32S2 mini***
- - 
+   
  - ***1.2.1***
  - wifi is setup on launch - just need to run connect command
  - kill_slave command added
