@@ -53,6 +53,9 @@ mb_communication_info_t comm_info = {
     .ip_addr = NULL,                           // This field keeps the client IP address to bind, NULL - bind to any client
 };
 
+ uint8_t isInitialized = false;
+ uint8_t isKilled = false;
+
 
 static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;
 
@@ -64,13 +67,16 @@ uint16_t input_reg_area[5000];
 void slave_operation_func_logging()
 {
     mb_param_info_t reg_info; // keeps the Modbus registers access information
-    uint8_t error_flag = 0;
+    uint8_t timer = 0;
 
-    ESP_LOGI(TAG, "Modbus slave stack initialized.");
-    ESP_LOGI(TAG, "Start modbus test...");
+    if(isInitialized == false) {
+       ESP_LOGI(TAG, "Please initialize Modbus First!"); 
+       return;
+    }
+    ESP_LOGI(TAG, "Starting modbus test...");
     // The cycle below will be terminated when parameter holding_data0
     // incremented each access cycle reaches the CHAN_DATA_MAX_VAL value.
-    while(error_flag == 0) {
+    while(timer <= 10) {
         // Check for read/write events of Modbus master for certain events
         (void)mbc_slave_check_event(MB_READ_WRITE_MASK);
         ESP_ERROR_CHECK_WITHOUT_ABORT(mbc_slave_get_param_info(&reg_info, MB_PAR_INFO_GET_TOUT));
@@ -85,10 +91,6 @@ void slave_operation_func_logging()
                             (unsigned)reg_info.type,
                             (uint32_t)reg_info.address,
                             (unsigned)reg_info.size);
-            if (reg_info.address >= (uint8_t*)&holding_reg_area[5000])
-            {
-                error_flag = 1;
-            }
         } else if (reg_info.type & MB_EVENT_INPUT_REG_RD) {
             ESP_LOGI(TAG, "INPUT READ (%" PRIu32 " us), ADDR:%u, TYPE:%u, INST_ADDR:0x%" PRIx32 ", SIZE:%u",
                             reg_info.time_stamp,
@@ -97,23 +99,35 @@ void slave_operation_func_logging()
                             (uint32_t)reg_info.address,
                             (unsigned)reg_info.size);
         }
+        timer++;
+        vTaskDelay(100);
     }
     // Destroy of Modbus controller on alarm
-    ESP_LOGI(TAG,"Modbus controller destroyed.");
+    ESP_LOGI(TAG,"Modbus logging stopping");
     vTaskDelay(100);
 }
 
-//Slave Operation
+//Slave Operation need to change
 void slave_operation_func()
 {
     mb_param_info_t reg_info; // keeps the Modbus registers access information
     uint8_t error_flag = 0;
 
-    ESP_LOGI(TAG, "Modbus slave stack initialized.");
+    if(isInitialized == false) {
+       ESP_LOGI(TAG, "Please initialize Modbus First!"); 
+       error_flag = 1;
+    }
+
     ESP_LOGI(TAG, "Start modbus test...");
     // The cycle below will be terminated when parameter holding_data0
     // incremented each access cycle reaches the CHAN_DATA_MAX_VAL value.
     while(error_flag == 0) {
+
+        if (isKilled == true) {
+        ESP_LOGI(TAG, "Operation exiting...");
+        isKilled = false;
+        error_flag = 1;
+        }
         // Check for read/write events of Modbus master for certain events
         (void)mbc_slave_check_event(MB_READ_WRITE_MASK);
         ESP_ERROR_CHECK_WITHOUT_ABORT(mbc_slave_get_param_info(&reg_info, MB_PAR_INFO_GET_TOUT));
@@ -142,12 +156,22 @@ void slave_operation_func()
         }
     }
     // Destroy of Modbus controller on alarm
-    ESP_LOGI(TAG,"Modbus controller destroyed.");
+    mbc_slave_destroy();
+    ESP_LOGI(TAG,"Modbus slave/controller destroyed.");
+    ESP_LOGI(TAG,"Please reinitialize.");
     vTaskDelay(100);
+    vTaskDelete(NULL);
 }
 
 
-
+esp_err_t kill_slave() {
+    isKilled = true;
+    portENTER_CRITICAL(&param_lock);
+    holding_reg_area[1] = 1;
+    portEXIT_CRITICAL(&param_lock);
+    
+    return ESP_OK;
+}
 
 
 esp_err_t slave_init(mb_communication_info_t* comm_info) {
@@ -200,6 +224,7 @@ esp_err_t slave_init(mb_communication_info_t* comm_info) {
                                         "mbc_slave_start fail, returns(0x%x).",
                                         (int)err);
     vTaskDelay(5);
+    isInitialized = true;
     return err;
 }
 
@@ -242,5 +267,5 @@ void start_slave() {
         NULL,          // Task handle
         0              // Core ID (1)
     );
-        vTaskDelay(2000);
+        vTaskDelay(100);
 }

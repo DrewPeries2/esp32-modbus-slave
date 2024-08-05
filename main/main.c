@@ -77,12 +77,9 @@ void start_CLI() {
         esp_log_level_set(TAG, ESP_LOG_VERBOSE);
 
         //registering command families
-        register_wifi();
-        register_modbus_init();
-        register_start_modbus();
-        register_ip();
-        register_wifi_enterprise();
-        //register_modbus_commands();
+        register_wifi_commands();
+        register_modbus_commands();
+        setup_wifi_at_start();
 
         esp_console_dev_uart_config_t hw_config = ESP_CONSOLE_DEV_UART_CONFIG_DEFAULT();
         ESP_LOGI(TAG, "Starting REPL");
