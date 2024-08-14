@@ -6,8 +6,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "wifi/wifi.c"
-#include "modbus/modbus.c"
+#include "wifi/wifi.h"
+#include "modbus/modbus.h"
+#include "ADC/ADC.c"
 #include "esp_log.h"
 #include "esp_console.h"
 #include "argtable3/argtable3.h"
@@ -15,6 +16,8 @@
 #include "freertos/task.h"
 #include "sdkconfig.h"
 
+struct wifi_args wpa_args;
+struct wifi_enterprise_args wpa2_args;
 
 #define TAG "slave"
     void register_modbus_init();
@@ -51,18 +54,18 @@ void setup_wifi_at_start() {
 
 void register_wifi_enterprise() {
 
-    wifi_enterprise_args.ssid = arg_str1(NULL, NULL, "<ssid>", "Wi-Fi SSID");
-    wifi_enterprise_args.username = arg_str1(NULL, NULL, "<username>", "Wi-Fi username");
-    wifi_enterprise_args.password = arg_str1(NULL, NULL, "<password>", "Wi-Fi password");
-    wifi_enterprise_args.id = arg_str1(NULL, NULL, "<id>", "Wi-Fi ID");
-    wifi_enterprise_args.end = arg_end(4);
+    wpa2_args.ssid = arg_str1(NULL, NULL, "<ssid>", "Wi-Fi SSID");
+    wpa2_args.username = arg_str1(NULL, NULL, "<username>", "Wi-Fi username");
+    wpa2_args.password = arg_str1(NULL, NULL, "<password>", "Wi-Fi password");
+    wpa2_args.id = arg_str1(NULL, NULL, "<id>", "Wi-Fi ID");
+    wpa2_args.end = arg_end(4);
 
     const esp_console_cmd_t cmd = {
         .command = "connect_wifi_enterprise",
         .help = "connect to wpa2 enterprise",
         .hint = NULL,
         .func = &init_wifi_enterprise,
-        .argtable = &wifi_enterprise_args
+        .argtable = &wpa2_args
     };
     ESP_ERROR_CHECK( esp_console_cmd_register(&cmd) );
     return;
@@ -70,16 +73,16 @@ void register_wifi_enterprise() {
 
 void register_wifi() {
 
-    wifi_args.ssid = arg_str1(NULL, NULL, "<ssid>", "Wi-Fi SSID");
-    wifi_args.password = arg_str1(NULL, NULL, "<password>", "Wi-Fi password");
-    wifi_args.end = arg_end(2);
+    wpa_args.ssid = arg_str1(NULL, NULL, "<ssid>", "Wi-Fi SSID");
+    wpa_args.password = arg_str1(NULL, NULL, "<password>", "Wi-Fi password");
+    wpa_args.end = arg_end(2);
 
     const esp_console_cmd_t cmd = {
         .command = "connect_wifi",
-        .help = "connect to wpa2 enterprise",
+        .help = "connect to wpa wifi",
         .hint = NULL,
         .func = &init_wifi, 
-        .argtable = &wifi_args
+        .argtable = &wpa_args
     };
     ESP_ERROR_CHECK( esp_console_cmd_register(&cmd) );
     return;

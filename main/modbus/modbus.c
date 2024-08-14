@@ -12,46 +12,12 @@
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
+#include "modbus.h"
 #include "nvs_flash.h"
 #include "esp_netif.h"
 #include "esp_mac.h"
 #include "mbcontroller.h" 
 #include "wifi/wifi.c"
-
-
-// MB DEFINES
-#define MB_SLAVE_ID (1)
-#define MB_TCP_PORT_NUMBER      (CONFIG_FMB_TCP_PORT_DEFAULT)
-#define MB_MDNS_PORT            (502)   
-
-#define TAG "slave"
-
-// Defines below are used to define register start address for each type of Modbus registers
-#define MB_REG_INPUT_START_AREA0            0 // register offset input area 0
-#define MB_REG_HOLDING_START_AREA0          0
-
-#define MB_PAR_INFO_GET_TOUT                (10) // Timeout for get parameter info
-#define MB_CHAN_DATA_MAX_VAL                (10)
-#define MB_CHAN_DATA_OFFSET                 (1.1f)
-
-#define MB_READ_MASK                        (MB_EVENT_INPUT_REG_RD \
-                                                | MB_EVENT_HOLDING_REG_RD \
-                                                | MB_EVENT_DISCRETE_RD \
-                                                | MB_EVENT_COILS_RD)
-#define MB_WRITE_MASK                       (MB_EVENT_HOLDING_REG_WR \
-                                                | MB_EVENT_COILS_WR)
-#define MB_READ_WRITE_MASK                  (MB_READ_MASK | MB_WRITE_MASK)
-
-#define MB_SLAVE_ADDR (CONFIG_MB_SLAVE_ADDR)
-
-
-//Data Structures
-mb_communication_info_t comm_info = {
-    .ip_port = 502,                    // Modbus TCP port number (default = 502)
-    .ip_addr_type = MB_IPV4,                   // version of IP protocol
-    .ip_mode = MB_MODE_TCP,                    // Port communication mode
-    .ip_addr = NULL,                           // This field keeps the client IP address to bind, NULL - bind to any client
-};
 
  uint8_t isInitialized = false;
  uint8_t isKilled = false;
@@ -62,6 +28,12 @@ static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;
 uint16_t holding_reg_area[5000];
 uint16_t input_reg_area[5000];
 
+mb_communication_info_t comm_info = {
+    .ip_port = 502,                    // Modbus TCP port number (default = 502)
+    .ip_addr_type = MB_IPV4,                   // version of IP protocol
+    .ip_mode = MB_MODE_TCP,                    // Port communication mode
+    .ip_addr = NULL,                           // This field keeps the client IP address to bind, NULL - bind to any client
+};
 
 //Slave Operation
 void slave_operation_func_logging()
