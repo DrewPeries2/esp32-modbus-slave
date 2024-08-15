@@ -1,5 +1,7 @@
 # _Auredia MB-Slave_
 
+
+***PLEASE LOOK AT THE 1-improve-multi-ADC BRANCH - it has more recent code***
 ## info
 This was developed using the ESP-IDF v5.3 (required) extension on vs-code, other IDEs have not been tested.
 Original documentation of the APK/APIs is here:
