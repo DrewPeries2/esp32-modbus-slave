@@ -12,6 +12,12 @@ Overview -
   The function "slave_init()" holds the processes to initialize the modbus controller, communication parameters, and the registers.
   The function "slave_operation_func()" is a while loop that continuously checks for reads/writes and handles/logs them.
 
+How to use the CLI - 
+  Start the modbus service through the CLI, there are three steps:
+  1. Connect to wifi - run connect_wifi_enterprise/connect_wifi
+  2. initialize modbus = run init_modbus
+  3. start modbus - run start_modbus
+
 How to initialize registers - 
   Register areas are initialized by populating a mb_register_area_descriptor_t type struct then inputting that into the0 "mbc_slave_set_descriptor()" function.
   In the slave_demo, this is found in the "slave_init()" function, where you specify the type, starting index, memory address, and size.
