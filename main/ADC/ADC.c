@@ -6,9 +6,26 @@
 #define TAG "slave"
 
 
-adc_oneshot_unit_handle_t adc1_handle;
-
 void init_ADC() {
+
+    //populate TAGs structs
+    //TODO: repeat the same for holding regs - make them share an index so they don't double book ADC channels
+    int error_flag = 0;
+    int i;
+    for (i = 0; i < arraylen(input_registers); i++) {
+        input_tags[i].registerNum = input_registers[i];
+        if (i <= 8) {
+            input_tags[i].channelnum = i;
+        } else {
+            ESP_LOGI(TAG, "More registers are being initialized than ADC channels"); 
+            error_flag = 1;
+            break;
+        }
+    }
+
+    if (error_flag == 1) {
+        return;
+    }
     
     adc_oneshot_unit_init_cfg_t init_config = {
         .unit_id = ADC_UNIT_1,
@@ -20,25 +37,27 @@ void init_ADC() {
         .bitwidth = ADC_BITWIDTH_DEFAULT,
         .atten = ADC_ATTEN_DB_0,
     };
-    adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_6, &config);
-    //initialize for any other channels/gpio ports
-    adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_5, &config);
+    for (i = 0; i < arraylen(input_tags); i++) {
+    adc_oneshot_config_channel(adc1_handle, input_tags[i].channelnum, &config);
+    }
 }
 
 void read_ADC_logging() {
     int adc_raw;
-    adc_oneshot_read(adc1_handle, ADC_CHANNEL_6, &adc_raw);
-    ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, ADC_CHANNEL_6, adc_raw); 
+    int i;
+    for (i = 0; i < arraylen(input_tags); i++) {
+            adc_oneshot_read(adc1_handle, input_tags[i].channelnum, &adc_raw);
+            ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, input_tags[i].channelnum, adc_raw); 
+            input_tags[i].value = adc_raw;
+    }
+
 }
 
 void read_ADC() {
     int adc_raw;
-    adc_oneshot_read(adc1_handle, ADC_CHANNEL_6, &adc_raw);
-     //this could also be holding_values - depends on needs
-    input_values[0] = adc_raw;
-    //read any other channels you need
-    adc_oneshot_read(adc1_handle, ADC_CHANNEL_5, &adc_raw);
-    input_values[1] = adc_raw;
-
-
+    int i;
+    for (i = 0; i < arraylen(input_tags); i++) {
+            adc_oneshot_read(adc1_handle, input_tags[i].channelnum, &adc_raw);
+            input_tags[i].value = adc_raw;
+    }
 }
