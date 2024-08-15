@@ -4,6 +4,13 @@
 #include "esp_adc/adc_oneshot.h"
 
 #define arraylen(x) (sizeof(x) / sizeof((x)[0]))
+//channel pins:
+/* channel 4: D32
+   channel 6: D34
+   channel 5: D33
+*/
+//TODO: this is kind of an issue -> i only found three pins that correspond to channels - not sure why.
+// may need to switch esp32 boards, i am currently using the Wroom, it doesn't have enough pins.
 
 typedef struct {
     int registerNum;
@@ -11,8 +18,8 @@ typedef struct {
     int channelnum;
 } Tag;
 
-Tag input_tags[10];  
-Tag holding_tags[10];
+Tag input_tags[8];  
+Tag holding_tags[8];
 
 adc_oneshot_unit_handle_t adc1_handle;
 

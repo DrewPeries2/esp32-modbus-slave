@@ -58,6 +58,7 @@ void read_ADC() {
     int i;
     for (i = 0; i < arraylen(input_tags); i++) {
             adc_oneshot_read(adc1_handle, input_tags[i].channelnum, &adc_raw);
+            ESP_LOGI(TAG, "ADC%d Channel[%d] Raw Data: %d", ADC_UNIT_1 + 1, input_tags[i].channelnum, adc_raw); 
             input_tags[i].value = adc_raw;
     }
 }
