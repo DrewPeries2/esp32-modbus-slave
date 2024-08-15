@@ -10,6 +10,7 @@
 #include "esp_log.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
+#include "ADC/ADC.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "modbus.h"
@@ -28,12 +29,34 @@ static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;
 uint16_t holding_reg_area[5000];
 uint16_t input_reg_area[5000];
 
+// Array of registers to be read
+// IMPORTANT: ORDER MATTERS - make sure it aligns with the order in which you read in the ADC.c file
+// TOOD: think of a better way to implement multiple ADCs
+uint16_t input_registers[] = {0, 1};
+uint16_t holding_registers[] = {2};
+// Array of values read
+
+
+
 mb_communication_info_t comm_info = {
     .ip_port = 502,                    // Modbus TCP port number (default = 502)
     .ip_addr_type = MB_IPV4,                   // version of IP protocol
     .ip_mode = MB_MODE_TCP,                    // Port communication mode
     .ip_addr = NULL,                           // This field keeps the client IP address to bind, NULL - bind to any client
 };
+
+esp_err_t update_values() {
+    //cycle through a list of all the values you need to append.
+    // TODO: change "int value" to a pointer to an array of updating values
+    //TODO: differentiate between holdign and input registers
+                portENTER_CRITICAL(&param_lock);
+
+                for (int i = 0; i < (sizeof(input_registers)/sizeof(input_registers[0])); i++) {
+                input_reg_area[input_registers[i]] = input_values[i];
+                }
+                portEXIT_CRITICAL(&param_lock);
+                return ESP_OK;
+}
 
 //Slave Operation
 void slave_operation_func_logging()
@@ -82,6 +105,7 @@ void slave_operation_func_logging()
 //Slave Operation need to change
 void slave_operation_func()
 {
+
     mb_param_info_t reg_info; // keeps the Modbus registers access information
     uint8_t error_flag = 0;
 
@@ -100,7 +124,12 @@ void slave_operation_func()
         isKilled = false;
         error_flag = 1;
         }
+
+        //read ADC, update values
+        read_ADC();
+        update_values();
         // Check for read/write events of Modbus master for certain events
+        //note for future programmers: the program stops at this line until its interacted with by a master
         (void)mbc_slave_check_event(MB_READ_WRITE_MASK);
         ESP_ERROR_CHECK_WITHOUT_ABORT(mbc_slave_get_param_info(&reg_info, MB_PAR_INFO_GET_TOUT));
         const char* rw_str = (reg_info.type & MB_READ_MASK) ? "READ" : "WRITE";
@@ -147,6 +176,8 @@ esp_err_t kill_slave() {
 
 
 esp_err_t slave_init(mb_communication_info_t* comm_info) {
+
+    init_ADC();
 
     mb_register_area_descriptor_t reg_area; // Modbus register area descriptor structure
     void* slave_handler = NULL;
@@ -200,6 +231,8 @@ esp_err_t slave_init(mb_communication_info_t* comm_info) {
     return err;
 }
 
+
+
 static esp_err_t slave_destroy(void)
 {
     esp_err_t err = mbc_slave_destroy();
@@ -209,24 +242,6 @@ static esp_err_t slave_destroy(void)
                                 (int)err);
     return err;
 }
-
-static void create_test_data() {
-            portENTER_CRITICAL(&param_lock);
-        holding_reg_area[1] = 1;
-        holding_reg_area[2] = 2;
-        holding_reg_area[3] = 3;
-        holding_reg_area[4] = 4;
-
-        holding_reg_area[11] = 11;
-        holding_reg_area[12] = 12;
-        holding_reg_area[13] = 13;
-        holding_reg_area[14] = 14;
-
-        input_reg_area[501] = 173;
-        input_reg_area[506] = 543;
-        portEXIT_CRITICAL(&param_lock);
-}
-
 
 void start_slave() {
     

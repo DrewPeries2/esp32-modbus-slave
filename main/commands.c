@@ -8,7 +8,6 @@
 #include <string.h>
 #include "wifi/wifi.h"
 #include "modbus/modbus.h"
-#include "ADC/ADC.c"
 #include "esp_log.h"
 #include "esp_console.h"
 #include "argtable3/argtable3.h"

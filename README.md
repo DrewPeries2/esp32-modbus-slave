@@ -16,6 +16,9 @@ How to initialize registers -
   Register areas are initialized by populating a mb_register_area_descriptor_t type struct then inputting that into the0 "mbc_slave_set_descriptor()" function.
   In the slave_demo, this is found in the "slave_init()" function, where you specify the type, starting index, memory address, and size.
   Note: you can initialize multiple areas of the same type with different starting indexes.
+
+How to define registers you want to read - 
+  There is an array in modbus.c, this array contains a list of which register indices that you need to be read. Each index should have an input from an ADC channel.
   
 Misc. Notes:
   If you'd like the modbus slave to only handle requests to its specific Slave ID, then remove the parenthesis around "1" in the "MB_Slave_ID" Define. I don't know why this happens.
@@ -40,6 +43,10 @@ Misc. Notes:
  - kill_slave command added
  - created logging/regular slaves
  - created flags to prevent uninitialized functions from running
+
+ ***1.3***
+ - ADC added - works with multiple ADC channels
+ - Multiple ADC channels implementation is scuffed - its all manually done
 
 
 # esp32-modbus-slave

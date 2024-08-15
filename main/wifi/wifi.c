@@ -65,13 +65,11 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     ESP_LOGI(TAG, "Run show_ip to see ip address");
     return ESP_OK;
 }
- ESP_LOGI(TAG, "debug1");
     int nerrors = arg_parse(argc, argv, (void **)&wpa_args);
     if (nerrors != 0) {
         arg_print_errors(stderr, wpa_args.end, argv[0]);
         return 1;
     }
- ESP_LOGI(TAG, "debug1");
     strncpy(stored_ssid, wpa_args.ssid->sval[0], sizeof(stored_ssid) - 1);
     strncpy(stored_password, wpa_args.password->sval[0], sizeof(stored_password) - 1);
 
@@ -168,7 +166,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     strncpy(stored_username, wpa2_args.username->sval[0], sizeof(stored_username) - 1);
     strncpy(stored_password, wpa2_args.password->sval[0], sizeof(stored_password) - 1);
     strncpy(stored_id, wpa2_args.id->sval[0], sizeof(stored_id) - 1);
-
+    
 
     wifi_config_t wifi_config = {
         .sta = {
