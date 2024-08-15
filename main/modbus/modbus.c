@@ -10,7 +10,7 @@
 #include "esp_log.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
-#include "ADC/ADC.h"
+#include "ADC/ADC.c"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "modbus.h"
@@ -29,12 +29,7 @@ static portMUX_TYPE param_lock = portMUX_INITIALIZER_UNLOCKED;
 uint16_t holding_reg_area[5000];
 uint16_t input_reg_area[5000];
 
-// Array of registers to be read
-// IMPORTANT: ORDER MATTERS - make sure it aligns with the order in which you read in the ADC.c file
-// TOOD: think of a better way to implement multiple ADCs
-uint16_t input_registers[] = {0, 1};
-uint16_t holding_registers[] = {2};
-// Array of values read
+
 
 
 
@@ -51,8 +46,8 @@ esp_err_t update_values() {
     //TODO: differentiate between holdign and input registers
                 portENTER_CRITICAL(&param_lock);
 
-                for (int i = 0; i < (sizeof(input_registers)/sizeof(input_registers[0])); i++) {
-                input_reg_area[input_registers[i]] = input_values[i];
+                for (int i = 0; i < (sizeof(input_tags)/sizeof(input_tags[0])); i++) {
+                input_reg_area[input_tags[i].registerNum] = input_tags[i].value;
                 }
                 portEXIT_CRITICAL(&param_lock);
                 return ESP_OK;
