@@ -1,7 +1,6 @@
 # _Auredia MB-Slave_
 
 
-***PLEASE LOOK AT THE 1-improve-multi-ADC BRANCH - it has more recent code***
 ## info
 This was developed using the ESP-IDF v5.3 (required) extension on vs-code, other IDEs have not been tested.
 Original documentation of the APK/APIs is here:
@@ -19,6 +18,12 @@ How to use the CLI -
   1. Connect to wifi - run connect_wifi_enterprise/connect_wifi
   2. initialize modbus = run init_modbus
   3. start modbus - run start_modbus
+
+How to use multiple ADC channels - 
+  In ADC.h, there's an array that holds the registers you want to read, the maximum amount is 8, as there are only 8 channels in the ESP32's ADC1. To know which 
+  register corresponds to which ADC channel, look at its place in the array. The channel number is assigned to the register number based on its index in the array,
+  so the register number at index 0, would be assigned channel 0, which is GPIO36.
+
 
 How to initialize registers - 
   Register areas are initialized by populating a mb_register_area_descriptor_t type struct then inputting that into the0 "mbc_slave_set_descriptor()" function.
@@ -55,6 +60,9 @@ Misc. Notes:
  ***1.3***
  - ADC added - works with multiple ADC channels
  - Multiple ADC channels implementation is scuffed - its all manually done
+
+***1.3.1***
+- Multiple ADC channels made less manual - needs more bug testing
 
 
 # esp32-modbus-slave
